@@ -196,33 +196,37 @@ async def upload_document(
 
 ### 3. AI Service Architecture
 
-#### AI Pipeline
+#### AI Pipeline with LLMs + RAG
 ```python
-# Document processing pipeline
+# Document processing pipeline using LLMs and RAG
 class DocumentPipeline:
     def __init__(self):
         self.ocr = OCRService()
-        self.nlp = NLPService()
-        self.legal_ai = LegalAIService()
+        self.embeddings = OpenAIEmbeddings()
+        self.vector_store = PineconeVectorStore()
+        self.llm_service = LLMService()
     
     async def process(self, document_id: str):
         # 1. Extract text
         document = await self.get_document(document_id)
         text = await self.ocr.extract_text(document.file_path)
         
-        # 2. Detect language
-        language = self.nlp.detect_language(text)
+        # 2. Chunk document for RAG
+        chunks = self.chunk_document(text, chunk_size=1000, overlap=200)
         
-        # 3. Clean and structure
-        cleaned_text = self.nlp.clean_legal_text(text, language)
-        sections = self.nlp.extract_sections(cleaned_text)
+        # 3. Generate embeddings and store
+        embeddings = await self.embeddings.create(chunks)
+        await self.vector_store.upsert(
+            document_id=document_id,
+            chunks=chunks,
+            embeddings=embeddings
+        )
         
-        # 4. AI analysis
-        analysis = await self.legal_ai.analyze(
-            text=cleaned_text,
-            sections=sections,
-            language=language,
-            document_type=document.type
+        # 4. AI analysis using LLM
+        analysis = await self.llm_service.analyze_contract(
+            text=text,
+            document_type=document.type,
+            language=document.language
         )
         
         # 5. Store results
@@ -231,48 +235,144 @@ class DocumentPipeline:
         return analysis
 ```
 
-#### Legal AI Models
+#### LLM Service Architecture
 ```python
-# Multi-model approach for accuracy
-class LegalAIService:
+# Using GPT-4 and Claude with RAG
+class LLMService:
     def __init__(self):
-        # Base models
-        self.arabic_model = self.load_model("aubmindlab/bert-base-arabertv2")
-        self.french_model = self.load_model("camembert-base")
-        self.multilingual = self.load_model("xlm-roberta-large")
+        # API clients
+        self.openai_client = OpenAI(api_key=OPENAI_KEY)
+        self.anthropic_client = Anthropic(api_key=ANTHROPIC_KEY)
         
-        # Fine-tuned models
-        self.contract_analyzer = self.load_custom_model("sanad-contract-v1")
-        self.risk_scorer = self.load_custom_model("sanad-risk-v1")
-        self.clause_extractor = self.load_custom_model("sanad-clause-v1")
+        # Vector store for RAG
+        self.vector_store = PineconeVectorStore()
+        
+        # Prompt templates
+        self.prompts = PromptTemplates()
     
-    async def analyze_contract(self, text: str, language: str):
-        # Ensemble approach for better accuracy
-        results = []
+    async def analyze_contract(self, text: str, document_type: str, language: str):
+        # 1. Retrieve relevant legal context
+        context = await self.vector_store.search(
+            query=text[:1000],  # Use first chunk as query
+            filter={"document_type": document_type, "language": language},
+            top_k=5
+        )
         
-        # Run through multiple models
-        if language == "ar":
-            results.append(await self.arabic_model.analyze(text))
-        elif language == "fr":
-            results.append(await self.french_model.analyze(text))
+        # 2. Build prompt with context
+        prompt = self.prompts.contract_analysis(
+            contract_text=text,
+            legal_context=context,
+            language=language
+        )
         
-        results.append(await self.multilingual.analyze(text))
-        results.append(await self.contract_analyzer.analyze(text))
+        # 3. Get analysis from LLM (with fallback)
+        try:
+            # Primary: GPT-4 for complex analysis
+            response = await self.openai_client.chat.completions.create(
+                model="gpt-4-turbo-preview",
+                messages=[
+                    {"role": "system", "content": self.prompts.legal_expert_system()},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.1,  # Low temperature for consistency
+                response_format={"type": "json_object"}
+            )
+            analysis = json.loads(response.choices[0].message.content)
+        except Exception as e:
+            # Fallback: Claude for reliability
+            response = await self.anthropic_client.messages.create(
+                model="claude-3-opus-20240229",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.1
+            )
+            analysis = self.parse_claude_response(response.content)
         
-        # Aggregate results
-        final_analysis = self.aggregate_results(results)
+        # 4. Validate and enhance with RAG
+        analysis = await self.validate_with_precedents(analysis, context)
         
-        # Extract specific elements
-        clauses = await self.clause_extractor.extract(text)
-        risks = await self.risk_scorer.calculate(text, clauses)
+        return analysis
+    
+    async def validate_with_precedents(self, analysis, context):
+        """Validate AI output against known precedents"""
+        # Check each identified risk against precedent database
+        for risk in analysis.get("risks", []):
+            similar_cases = await self.vector_store.search(
+                query=risk["description"],
+                filter={"type": "precedent"},
+                top_k=3
+            )
+            risk["precedents"] = similar_cases
+            risk["confidence"] = self.calculate_confidence(similar_cases)
         
-        return {
-            "summary": final_analysis.summary,
-            "key_terms": final_analysis.key_terms,
-            "clauses": clauses,
-            "risks": risks,
-            "confidence": final_analysis.confidence
-        }
+        return analysis
+```
+
+#### RAG Implementation
+```python
+# Retrieval Augmented Generation for legal accuracy
+class LegalRAGSystem:
+    def __init__(self):
+        self.embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
+        self.vector_store = PineconeVectorStore(
+            index_name="sanad-legal-docs",
+            dimension=3072  # For text-embedding-3-large
+        )
+        self.reranker = CohereRerank()  # For better relevance
+    
+    async def build_knowledge_base(self):
+        """Index legal documents for RAG"""
+        documents = [
+            # Tunisian legal corpus
+            {"type": "law", "content": "Tunisian Commercial Code..."},
+            {"type": "precedent", "content": "Court decision..."},
+            {"type": "template", "content": "Standard contract..."},
+            
+            # Saudi legal corpus
+            {"type": "regulation", "content": "Saudi contract law..."},
+            {"type": "fatwa", "content": "Sharia ruling on contracts..."},
+        ]
+        
+        for doc in documents:
+            chunks = self.chunk_document(doc["content"])
+            embeddings = await self.embeddings.create(chunks)
+            
+            await self.vector_store.upsert(
+                chunks=chunks,
+                embeddings=embeddings,
+                metadata={
+                    "type": doc["type"],
+                    "source": doc.get("source"),
+                    "date": doc.get("date"),
+                    "jurisdiction": doc.get("jurisdiction")
+                }
+            )
+    
+    async def retrieve_context(self, query: str, filters: dict = None):
+        """Retrieve relevant legal context"""
+        # 1. Initial retrieval
+        results = await self.vector_store.search(
+            query=query,
+            filter=filters,
+            top_k=20
+        )
+        
+        # 2. Rerank for relevance
+        reranked = await self.reranker.rerank(
+            query=query,
+            documents=results,
+            top_k=5
+        )
+        
+        # 3. Format context with citations
+        context = []
+        for doc in reranked:
+            context.append({
+                "content": doc.content,
+                "source": doc.metadata.get("source", "Unknown"),
+                "relevance_score": doc.score
+            })
+        
+        return context
 ```
 
 ### 4. Database Design
@@ -786,12 +886,32 @@ jobs:
     "redis": "5.0.0"
   },
   "ai": {
-    "transformers": "4.35.0",
-    "torch": "2.1.0",
     "langchain": "0.1.0",
-    "sentence-transformers": "2.2.0"
+    "openai": "1.12.0",
+    "anthropic": "0.18.0",
+    "pinecone-client": "2.0.0",
+    "cohere": "4.47.0"
   }
 }
+```
+
+### API Cost Estimates (Monthly)
+```
+OpenAI GPT-4 Turbo:
+- Input: $10/1M tokens (~500 docs @ 10k tokens = $50)
+- Output: $30/1M tokens (~500 docs @ 2k tokens = $30)
+- Embeddings: $0.13/1M tokens (~$20/month)
+
+Claude 3 Opus (Fallback):
+- $15/$75 per 1M tokens (input/output)
+- ~20% of traffic = $50/month
+
+Pinecone Vector DB:
+- Starter plan: $70/month
+- 100k vectors, 5 indexes
+
+Total AI Costs: ~$220/month for 500 documents
+Scale: ~$2,000/month for 5,000 documents
 ```
 
 ## Architecture Decisions Record (ADR)
@@ -813,6 +933,14 @@ jobs:
 **Context**: Enterprise law firms require data sovereignty
 **Decision**: Kubernetes-based deployment for both cloud and on-prem
 **Consequences**: More complex architecture, broader market reach
+
+### ADR-004: LLMs + RAG over Custom Models
+**Status**: Accepted
+**Context**: Need fast time-to-market with high accuracy
+**Decision**: Use GPT-4/Claude APIs with RAG instead of training custom models
+**Consequences**: 
+- Pros: 6-month faster deployment, $500K+ savings, better accuracy, easier updates
+- Cons: Ongoing API costs, dependency on providers, need robust fallbacks
 
 ---
 

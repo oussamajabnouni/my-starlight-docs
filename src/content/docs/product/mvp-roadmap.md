@@ -59,43 +59,44 @@ description: Week-by-week guide to building and launching SANAD's MVP
 
 ### Weeks 3-4: Core AI Development
 
-#### Week 3: Document Processing Pipeline
-**Build the brain of SANAD**:
+#### Week 3: Document Processing & RAG Setup
+**Build the foundation**:
 
 ```python
 # Core pipeline architecture
 1. Upload API (multipart, resumable)
-2. File validation (PDF, DOCX, images)
-3. OCR service (Arabic + French)
-4. Text extraction and cleaning
-5. Document storage (encrypted)
+2. File validation (PDF, DOCX, images)  
+3. OCR service (Google Vision API)
+4. Document chunking for RAG
+5. Vector database setup (Pinecone)
+6. Embeddings pipeline (OpenAI)
 ```
 
 **Daily Goals**:
 - Monday: Upload API + file validation
-- Tuesday: OCR integration (Google Vision API)
-- Wednesday: Arabic text processing
-- Thursday: French text processing  
-- Friday: Storage and security
+- Tuesday: OCR integration + text extraction
+- Wednesday: Document chunking strategy
+- Thursday: Vector DB setup + embeddings
+- Friday: RAG retrieval testing
 
-#### Week 4: AI Analysis Engine
+#### Week 4: LLM Integration & Prompting
 **The magic happens here**:
 
 ```python
-# Analysis modules to build
-1. Language detection
-2. Document type classification
-3. Key terms extraction
-4. Risk identification
-5. Summary generation
+# LLM integration modules
+1. OpenAI GPT-4 setup
+2. Claude API integration (fallback)
+3. Prompt templates for legal analysis
+4. Response parsing & validation
+5. Source citation system
 ```
 
 **Daily Goals**:
-- Monday: Fine-tune Arabic legal model
-- Tuesday: Build extraction pipeline
-- Wednesday: Risk scoring algorithm
-- Thursday: Summary generation
-- Friday: Accuracy testing (aim for 90%+)
+- Monday: API integrations (OpenAI + Anthropic)
+- Tuesday: Legal prompt engineering
+- Wednesday: Contract analysis prompts
+- Thursday: Response validation & citations
+- Friday: End-to-end testing (aim for <30s response)
 
 ### Weeks 5-6: Frontend Development
 
@@ -273,10 +274,16 @@ Enterprise: Custom pricing
 
 **Why These Choices**:
 1. **Next.js**: SEO-friendly, great DX, Vercel hosting
-2. **FastAPI**: Fast, Python ecosystem for AI
-3. **PostgreSQL**: Reliable, JSON support for documents
-4. **LangChain**: Flexibility for prompt engineering
+2. **FastAPI**: Fast, async Python for API orchestration
+3. **PostgreSQL + Pinecone**: PostgreSQL for metadata, Pinecone for vectors
+4. **LangChain**: Orchestrates LLMs, RAG, and prompt management
 5. **DigitalOcean**: EU data residency, cost-effective
+
+**LLM Strategy**:
+- **Primary**: GPT-4 Turbo (best accuracy, JSON mode)
+- **Fallback**: Claude 3 Opus (reliability)
+- **Embeddings**: OpenAI text-embedding-3-large
+- **Reranking**: Cohere Rerank for better relevance
 
 ## Success Metrics
 
@@ -329,7 +336,11 @@ Enterprise: Custom pricing
 ```
 Development Costs:
 - Hosting: $200/month
-- APIs (OCR, etc): $500/month  
+- LLM APIs: $2,000/month
+  - OpenAI GPT-4: ~$1,500/month
+  - Claude API: ~$300/month
+  - Embeddings: ~$200/month
+- Other APIs (OCR, Pinecone): $500/month  
 - Tools/Software: $300/month
 
 Marketing:
@@ -342,8 +353,14 @@ Legal/Admin:
 - Legal review: $1,000
 - Insurance: $500/month
 
-Total: ~$15,000 for MVP
+Total: ~$21,000 for MVP
 ```
+
+**Cost Optimization Tips**:
+- Start with GPT-3.5 for development/testing
+- Implement caching to reduce API calls
+- Use embeddings sparingly (batch processing)
+- Monitor usage closely with limits
 
 ## Post-MVP Roadmap
 

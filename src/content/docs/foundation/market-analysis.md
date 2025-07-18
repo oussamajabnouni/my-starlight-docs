@@ -117,11 +117,12 @@ Saudi Arabia's Vision 2030 is creating massive demand for legal services:
 | **AI Capabilities** | Basic AI features | Advanced but not localized | Specialized for MENA legal systems |
 
 ### Key Success Factors
-1. **Deep Local Knowledge**: Understanding Tunisian civil law and Saudi Sharia principles
-2. **Language Excellence**: Superior Arabic NLP handling legal terminology
-3. **Trust Building**: Local presence and data sovereignty
-4. **Pricing Strategy**: Competitive for Tunisia, premium for Saudi Arabia
+1. **Deep Local Knowledge**: Curated legal databases for RAG (Tunisian civil law, Saudi Sharia)
+2. **Prompt Engineering Excellence**: Legal-specific prompts optimized for GPT-4/Claude
+3. **Trust Through Transparency**: Show sources, allow verification, maintain audit trails
+4. **Cost Efficiency**: Using APIs instead of training models = faster time to market
 5. **Integration**: Seamless workflow with existing legal practices
+6. **Data Curation**: High-quality legal corpus for RAG accuracy
 
 ## Market Validation Checklist
 

@@ -75,22 +75,79 @@ contract_analyzer = {
 
 ## Technical Implementation
 
-### AI Model Architecture
+### LLM + RAG Architecture
 ```python
 class ContractAnalyzer:
     def __init__(self):
-        # Base models for language understanding
-        self.arabic_model = "aubmindlab/bert-base-arabertv2"
-        self.french_model = "camembert-base"
-        self.english_model = "legal-bert-base"
+        # LLM APIs
+        self.gpt4 = OpenAI(api_key=OPENAI_KEY)
+        self.claude = Anthropic(api_key=ANTHROPIC_KEY)
         
-        # Custom fine-tuned models
-        self.clause_extractor = "sanad-clause-extractor-v1"
-        self.risk_scorer = "sanad-risk-analyzer-v1"
+        # RAG components
+        self.embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
+        self.vector_store = PineconeVectorStore(index="sanad-legal")
+        self.reranker = CohereRerank()
         
-        # RAG for precedent matching
-        self.vector_db = "pinecone"
-        self.embeddings = "multilingual-e5-large"
+        # Prompt engineering
+        self.prompt_templates = LegalPromptTemplates()
+    
+    async def analyze_contract(self, contract_text: str, language: str):
+        # 1. Retrieve relevant legal context
+        legal_context = await self.retrieve_legal_context(contract_text)
+        
+        # 2. Construct prompt with context
+        prompt = self.prompt_templates.contract_analysis(
+            contract=contract_text,
+            context=legal_context,
+            language=language,
+            instructions="""
+            Extract and analyze:
+            1. Key parties and obligations
+            2. Financial terms and payment conditions
+            3. Termination clauses
+            4. Liability and indemnification
+            5. Potential risks and missing clauses
+            
+            Provide response in structured JSON format.
+            """
+        )
+        
+        # 3. Get analysis from LLM
+        analysis = await self.gpt4.chat.completions.create(
+            model="gpt-4-turbo-preview",
+            messages=[
+                {"role": "system", "content": "You are an expert legal analyst specializing in " + 
+                 ("Tunisian civil law" if language == "fr" else "Saudi commercial law")},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.1,
+            response_format={"type": "json_object"}
+        )
+        
+        return json.loads(analysis.choices[0].message.content)
+```
+
+### Prompt Engineering for Legal AI
+```python
+class LegalPromptTemplates:
+    def contract_analysis(self, contract, context, language, instructions):
+        return f"""
+        LEGAL CONTEXT FROM SIMILAR CONTRACTS:
+        {self.format_context(context)}
+        
+        CONTRACT TO ANALYZE:
+        {contract}
+        
+        ANALYSIS REQUIREMENTS:
+        {instructions}
+        
+        IMPORTANT:
+        - Base your analysis on the provided legal context
+        - Cite specific clauses when identifying issues
+        - Compare against standard practices from the context
+        - Flag any deviations from typical contracts
+        - Ensure compliance with {language} legal requirements
+        """
 ```
 
 ### Data Requirements
@@ -135,22 +192,23 @@ quality_metrics = {
 ## Competitive Advantages
 
 ### vs E-Tafakna (Tunisia)
-- Superior UI/UX design
-- Deeper AI capabilities
-- Better integration options
-- Competitive pricing
+- Better RAG implementation with source citations
+- Multi-LLM approach (GPT-4 + Claude) for reliability
+- Superior prompt engineering for legal tasks
+- Modern UI/UX with real-time processing
 
 ### vs Luminance (Saudi)
-- Arabic-first design
-- Local law expertise
-- 70% lower cost
-- On-premise option
+- 70% lower cost (API-based vs custom models)
+- Faster deployment and iteration
+- Arabic-first prompt engineering
+- Transparent pricing model
 
-### vs Generic AI (ChatGPT)
-- Legal-specific training
-- No hallucinations
-- Structured outputs
-- Audit trail
+### vs Generic AI (ChatGPT/Claude)
+- Curated legal knowledge base via RAG
+- Structured outputs for legal workflows  
+- Source verification and citations
+- Compliance with legal data requirements
+- Specialized prompts for MENA law
 
 ## Development Roadmap
 
