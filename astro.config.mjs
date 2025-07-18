@@ -27,6 +27,7 @@ export default defineConfig({
 					items: [
 						{ label: 'Product Strategy', slug: 'product/strategy' },
 						{ label: 'MVP Roadmap', slug: 'product/mvp-roadmap' },
+						{ label: 'AI Features Analysis', slug: 'product/ai-features' },
 						{ label: 'Technical Architecture', slug: 'product/technical-architecture' },
 					],
 				},
@@ -34,6 +35,7 @@ export default defineConfig({
 					label: 'Go-to-Market',
 					items: [
 						{ label: 'GTM Strategy', slug: 'gtm/strategy' },
+						{ label: 'Saudi Expansion', slug: 'gtm/saudi-expansion' },
 					],
 				},
 				{

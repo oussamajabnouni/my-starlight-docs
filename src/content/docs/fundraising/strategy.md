@@ -30,17 +30,21 @@ description: Complete guide to raising capital for SANAD, including pitch deck t
 
 ### Sources Prioritized
 
-#### 1. Startup Tunisia Grant (40K EUR)
-**Requirements**:
-- Startup Act label
-- Innovative technology
-- Job creation plan
+#### 1. Startup Tunisia Grant & Benefits
+**Startup Act (Law n°2018-20) Benefits**:
+- Direct grants up to 40K EUR
+- 0% corporate tax (vs 15% standard)
+- State covers employer social charges
+- Creation leave for employees
+- Investor tax relief
 
 **Application Timeline**:
 - Week 1: Prepare documentation
-- Week 2: Submit application
-- Week 4-8: Interview process
-- Week 12: Funding received
+- Week 2: Submit application via startup.gov.tn
+- Week 4-8: Committee review & interview
+- Week 12: Label granted & funding received
+
+**Success Rate**: Tunisia has 1,018 labeled startups, with AI/tech favored
 
 #### 2. Angel Investors ($150K)
 **Target Profile**:
@@ -60,6 +64,20 @@ description: Complete guide to raising capital for SANAD, including pitch deck t
 2. **500 Startups MENA** - $150K, global reach
 3. **Techstars Dubai** - $120K, strong mentor network
 4. **Y Combinator** - $500K, worth the move
+
+### Tunisian AI Funding Landscape
+
+**Recent Success Stories**:
+- **Thunder Code** (2025): $9M seed - AI testing startup
+- **InstaDeep**: $107M Series B, BioNTech acquisition
+- **58 AI startups** in Tunisia, 15 funded (26% funding rate)
+
+**Active VCs in Tunisian AI**:
+1. **Flat6Labs Tunisia**: 3 AI investments, most active
+2. **Silicon Badia**: Led Thunder Code round
+3. **Janngo Capital**: Pan-African focus
+4. **Orange Digital Ventures**: Corporate VC
+5. **Maxula Seed Fund**: Early-stage focus
 
 ### Pre-Seed Pitch Deck (10 slides)
 

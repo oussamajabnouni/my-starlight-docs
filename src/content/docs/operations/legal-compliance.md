@@ -85,30 +85,41 @@ Building legal tech in MENA requires careful navigation of regulations. This gui
 
 ### Tunisia: INPDP Requirements
 
+Tunisia's data protection framework is governed by **Organic Law No. 2004-63 on Personal Data Protection**, with the **National Authority for the Protection of Personal Data (INPDP)** overseeing compliance. Tunisia signed the Council of Europe's Convention 108 in 2017, indicating alignment with GDPR-like standards.
+
 #### Key Obligations
 1. **Data Controller Registration**
    - Register with INPDP before processing
    - Annual fee: 500 TND
    - Update within 30 days of changes
+   - Covers lawful processing, purpose limitation, data minimization
 
 2. **Privacy Policy Requirements**
    - Clear purpose of collection
    - Data retention periods
-   - User rights explanation
+   - User rights explanation (access, rectification, deletion)
    - Contact information
-   - Arabic + French versions
+   - Arabic + French versions mandatory
 
 3. **User Consent**
    - Explicit, not implied
    - Separate for each purpose
    - Easy withdrawal mechanism
    - Records of consent required
+   - Special protection for sensitive data
 
 4. **Data Security**
-   - Encryption required
-   - Access controls
+   - End-to-end encryption required
+   - Role-based access controls
    - Incident reporting (72 hours)
    - Annual security audit
+   - Regular vulnerability assessments
+
+#### AI-Specific Considerations
+- **National AI Strategy (2021-2025)** promotes AI adoption
+- No comprehensive AI law yet, but IP Policy for AI under development
+- Algorithm protection framework being established
+- **Decree-Law No. 54 (2022)** on information system crimes may apply
 
 #### INPDP Compliance Checklist
 - [ ] Appoint Data Protection Officer
