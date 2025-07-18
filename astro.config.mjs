@@ -9,11 +9,6 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'SANAD Founder Playbook',
-			logo: {
-				light: './src/assets/sanad-logo-light.svg',
-				dark: './src/assets/sanad-logo-dark.svg',
-				replacesTitle: false,
-			},
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/oussamajabnouni/my-starlight-docs' },
 				{ icon: 'linkedin', label: 'LinkedIn', href: 'https://linkedin.com/company/sanad-ai' },
