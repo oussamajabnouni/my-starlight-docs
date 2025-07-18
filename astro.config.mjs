@@ -28,22 +28,17 @@ export default defineConfig({
 						{ label: 'Product Strategy', slug: 'product/strategy' },
 						{ label: 'MVP Roadmap', slug: 'product/mvp-roadmap' },
 						{ label: 'Technical Architecture', slug: 'product/technical-architecture' },
-						{ label: 'AI Features', slug: 'product/ai-features' },
 					],
 				},
 				{
 					label: 'Go-to-Market',
 					items: [
 						{ label: 'GTM Strategy', slug: 'gtm/strategy' },
-						{ label: 'Tunisia Launch', slug: 'gtm/tunisia-launch' },
-						{ label: 'Saudi Expansion', slug: 'gtm/saudi-expansion' },
-						{ label: 'Pricing Strategy', slug: 'gtm/pricing' },
 					],
 				},
 				{
 					label: 'Operations',
 					items: [
-						{ label: 'Team Building', slug: 'operations/team-building' },
 						{ label: 'Legal & Compliance', slug: 'operations/legal-compliance' },
 						{ label: 'Metrics & KPIs', slug: 'operations/metrics' },
 					],
@@ -52,15 +47,11 @@ export default defineConfig({
 					label: 'Fundraising',
 					items: [
 						{ label: 'Funding Strategy', slug: 'fundraising/strategy' },
-						{ label: 'Pitch Deck', slug: 'fundraising/pitch-deck' },
-						{ label: 'Financial Model', slug: 'fundraising/financial-model' },
 					],
 				},
 				{
 					label: 'Resources',
 					items: [
-						{ label: 'Templates', slug: 'resources/templates' },
-						{ label: 'Partnerships', slug: 'resources/partnerships' },
 						{ label: 'Weekly Checklist', slug: 'resources/weekly-checklist' },
 					],
 				},
